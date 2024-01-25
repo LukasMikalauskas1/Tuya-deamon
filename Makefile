@@ -17,4 +17,3 @@ $(BIN):
 	$(CC) $(CFLAGS) -o $@ $(CFILES) $(LDFLAGS)
 clean:
 	$(RM) -rf $(BIN) $(BUILD_DIR)
-	$(RM) -rf "TuyaDeamonData.txt"

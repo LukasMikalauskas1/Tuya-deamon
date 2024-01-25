@@ -6,5 +6,7 @@
 int exe_program(struct arguments args);
 void signal_handler(int signal);
 int start_deamon(bool value);
+void ignore_signals();
+void handle_signals();
 
 #endif

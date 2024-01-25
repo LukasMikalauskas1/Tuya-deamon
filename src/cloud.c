@@ -34,15 +34,15 @@ void on_messages(tuya_mqtt_context_t *context, void *user_data, const tuyalink_m
         switch (msg->type)
         {
         case THING_TYPE_PROPERTY_SET:
-                syslog(LOG_INFO, "Property set: %s", msg->data_string);
-                TY_LOGI("Property set: %s", msg->data_string);
+                syslog(LOG_INFO, "Property set message: %s", msg->data_string);
+                TY_LOGI("Property setm message: %s", msg->data_string);
         case THING_TYPE_ACTION_EXECUTE:
-                syslog(LOG_INFO, "Executing action: %s", msg->data_string);
-                TY_LOGI("Executing action: %s", msg->data_string);
+                syslog(LOG_INFO, "Executing action message: %s", msg->data_string);
+                TY_LOGI("Executing action message: %s", msg->data_string);
                 exe_action(msg);
         default:
-                syslog(LOG_INFO, "Default: %s", msg->data_string);
-                TY_LOGI("Default: %s", msg->data_string);
+                syslog(LOG_INFO, "Default message: %s", msg->data_string);
+                TY_LOGI("Default message: %s", msg->data_string);
                 break;
         }
         printf("\r\n");
@@ -62,7 +62,7 @@ int cloud_connect(tuya_mqtt_context_t *context, struct arguments args)
         ret = tuya_mqtt_init(context, &(const tuya_mqtt_config_t){
                                           .host = "m1.tuyacn.com",
                                           .port = 8883,
-                                          .cacert = (const uint8_t *)tuya_cacert_pem, //(const uint8_t*)
+                                          .cacert = (const uint8_t *)tuya_cacert_pem,
                                           .cacert_len = sizeof(tuya_cacert_pem),
                                           .device_id = args.device_id,
                                           .device_secret = args.device_secret,
@@ -123,11 +123,10 @@ char *parse_data(char *string)
 struct sysinfo sys;
 void send_report(tuya_mqtt_context_t *context, struct arguments args)
 {
-        sleep(2);
+        sleep(1);
         sysinfo(&sys);
         char data[30];
         snprintf(data, sizeof(data), "{\"FreeRam\":\"%lu KB\"}", sys.freeram * sys.mem_unit / 1024);
-
         syslog(LOG_INFO, "Sending report to cloud");
         tuyalink_thing_property_report(context, args.device_id, data);
 }

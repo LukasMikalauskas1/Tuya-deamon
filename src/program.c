@@ -15,29 +15,25 @@
 #include "cloud.h"
 #include "program.h"
 
-bool connected = false;
 tuya_mqtt_context_t client_instance;
 
 int exe_program(struct arguments args)
 {
         int ret = OPRT_OK;
+        bool connected = false;
 
         openlog("Tuya_deamon", LOG_PID, LOG_USER);
         syslog(LOG_INFO, "=====TUYA_DEAMON=====");
-
-        signal(SIGTERM, signal_handler);
-        signal(SIGTSTP, signal_handler);
 
         ret = start_deamon(args.start_deamon);
         if (ret == EXIT_FAILURE)
                 return EXIT_FAILURE;
 
-        // Waits till the program conncets to the cloud to prevent memory leak
         tuya_mqtt_context_t *client = &client_instance;
 
-        while (!connected)
+        ignore_signals();
+        while (!connected) // Waits till the program conncets to the cloud to prevent memory leak
         {
-                signal(SIGINT, SIG_IGN);
                 ret = cloud_connect(client, args);
                 if (ret != OPRT_OK)
                 {
@@ -47,8 +43,9 @@ int exe_program(struct arguments args)
                         return EXIT_FAILURE;
                 }
                 connected = true;
-                signal(SIGINT, signal_handler);
+                ret = OPRT_OK;
         }
+        handle_signals();
 
         while (true)
         {
@@ -80,4 +77,18 @@ int start_deamon(bool is_deamon)
                 syslog(LOG_INFO, "Started program as a deamon!");
         }
         return EXIT_SUCCESS;
+}
+
+void ignore_signals()
+{
+        signal(SIGTERM, SIG_IGN);
+        signal(SIGTSTP, SIG_IGN);
+        signal(SIGINT, SIG_IGN);
+}
+
+void handle_signals()
+{
+        signal(SIGTERM, signal_handler);
+        signal(SIGTSTP, signal_handler);
+        signal(SIGINT, signal_handler);
 }
